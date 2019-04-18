@@ -17,65 +17,75 @@ const getUserIndexById = function(user) {
     userValidator.setError("user not found!");
 };
 
-const createUserModelFromObject = exports.createUserModelFromObject = function(body) {
-    return new UserModel(body.email, body.password, body.firstName, body.lastName, body.dateOfBirth);
+const createUserModelFromObject = function(body) {
+    return new UserModel(body.id, body.email, body.password, body.firstName, body.lastName, body.dateOfBirth);
 };
 
-exports.createUserModelByWithEmail = function(email) {
+const createUserModelByWithEmail = function(email) {
   return new UserModel(email.toString(), null, null, null, null);
 };
 
 // CRUD methods
-exports.getUsers = function(page, maxPerPage) {
+exports.getUsers = function(req, res) {
+    let page = req.params.page;
+    let maxPerPage = req.params.maxPerPage;
     let offset = (page - 1) * maxPerPage,
     data = userList.slice(offset).slice(0, maxPerPage),
     totalPages = Math.ceil(userList.length / maxPerPage);
-    return {
-        page: page,
-        per_page: maxPerPage,
-        pre_page: data.length,
-        total: userList.length,
-        total_pages: totalPages,
-        data: data
-    };
+
+    const header = "----- Users (" + page + "/" + totalPages + ") -----\n";
+    let content = "";
+    let users = data;
+    for (let i = 0; i < users.length; i++) {
+        content += createUserModelFromObject(users[i]).toString() + "\n";
+    }
+
+    res.send(header + content);
 };
 
-exports.getUserByEmail = function (user) {
+exports.getUserByEmail = function (req, res) {
+    const user = createUserModelByWithEmail(req.params.email);
     for (let i = 0; i < userList.length; i++) {
         if (user.email === userList[i].email) {
-            return userList[i];
+            res.send(JSON.stringify(userList[i]));
         }
     }
-    return "user not found!";
+    res.send("user not found!");
 };
 
-exports.createUser = function(user) {
+exports.createUser = function(req, res) {
+    const user = createUserModelFromObject(req.body);
     if (userValidator.isUserValid(user, createValidators)) {
         userList.push(user);
-        return true;
+        res.send("User was created!");
+    } else {
+        res.send(userValidator.getError());
     }
 };
 
-exports.updateUser = function(user) {
+exports.updateUser = function(req, res) {
+    let user = createUserModelFromObject(req.body);
+    user.id = Number(req.params.id);
     if (userValidator.isUserValid(user, editValidators)) {
         let i = getUserIndexById(user);
         if (i != null) {
            userList[i] = user;
+           res.send("User was updated!")
         } else {
-            userValidator.setError("User does not exist");
+            res.send("User does not exist");
         }
     }
 };
 
-exports.deleteUser = function (user) {
-    if (user !== null) {
-        let i = getUserIndexById(user);
-        if (i != null) {
-            userList.splice(i, 1);
-            return true;
-        } else {
-            userValidator.setError("User does not exist");
-        }
+exports.deleteUser = function (req, res) {
+    let user = createUserModelFromObject(req.body);
+    user.id = Number(req.params.id);
+    let i = getUserIndexById(user);
+    if (i != null) {
+        userList.splice(i, 1);
+        res.send("User was deleted!");
+    } else {
+        res.send("User does not exist");
     }
 };
 

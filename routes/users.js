@@ -1,44 +1,20 @@
 const express = require('express');
 const userController = require('../controllers/user.controller');
 const router = express.Router();
-const userValidator = require('../bl/validators/user.validator');
 
 
 // -- routes -- //
-router.get("/:page/:maxPerPage", function (req, res) {
-  res.send(userController.getUsers(req.params.page, req.params.maxPerPage));
-});
+router.get("/:page/:maxPerPage", userController.getUsers);
 
-/* GET users listing. */
-router.get('/:email', function(req, res) {
-  res.send(userController.getUserByEmail(userController.createUserModelByWithEmail(req.params.email)));
-});
+/* GET users by mail. */
+router.get('/:email', userController.getUserByEmail);
 
 /* POST create user */
-router.post("/", function (req, res) {
-  const user = userController.createUserModelFromObject(req.body);
-  if (userController.createUser(user)) {
-    res.send("\n" + "User created!");
-  } else {
-    res.send("\n" + userValidator.getError());
-  }
-});
+router.post("/", userController.createUser);
 
 /* PUT edit user */
-router.put("/:id", function (req, res) {
-  let user = userController.createUserModelFromObject(req.body);
-  user.id = Number(req.params.id);
-  userController.updateUser(user);
-  if (userValidator.hasError()) {
-    res.send("\n" + userValidator.getError());
-  } else {
-    res.send("\n" + user.name() + " was updated!");
-  }
-});
+router.put("/:id", userController.updateUser);
 
-router.delete("/", function (req, res) {
-  const user = userController.createUserModelFromObject(req.body);
-  userController.deleteUser(user);
-});
+router.delete("/:id", userController.deleteUser);
 
 module.exports = router;

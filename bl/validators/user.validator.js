@@ -26,6 +26,7 @@ const validateEmail = function(user) {
     let found = false;
     if (!user.email) {
         err = "Email is a mandatory field";
+        return false;
     }
     if (user.email.length === "") {
         err = "Email is a mandatory field";
@@ -37,9 +38,24 @@ const validateEmail = function(user) {
     }
     if (found) {
         err = "email already exist";
+        return false;
     }
     return true;
 };
+
+const isIdExist = function (user) {
+    let found = false;
+    for (let i = 0; i < userList.length; i++) {
+        if (userList[i].id === user.id) {
+            found = true;
+        }
+    }
+    if (found) {
+        err = "id already exist";
+        return false;
+    }
+    return true;
+}
 
 const validatePassword = function(user) {
     if (!user) {
@@ -61,15 +77,21 @@ const validatePassword = function(user) {
         return true;
     } else {
         err = "password must contain at least one upper case letter, one lower case letter and one digit";
+        return false;
     }
 };
 
 const isContainRequiredFields = function (user) {
-    return user.email && user.firstName && user.lastName && user.password;
+    if  (user.id && user.email && user.firstName && user.lastName && user.password) {
+        return true;
+    } else {
+        err = "Missing a required field";
+        return false;
+    }
 };
 
-exports.createValidators = [basicValidation, isContainRequiredFields, validateEmail, validatePassword];
-exports.editValidators = [basicValidation, isContainRequiredFields, validatePassword];
+exports.createValidators = [isIdExist, basicValidation, validateEmail, validatePassword, isContainRequiredFields];
+exports.editValidators = [basicValidation, validateEmail, validatePassword, isContainRequiredFields];
 
 exports.isUserValid = function(userModel, validators) {
     let result = true;

@@ -3,10 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
-  },
-  "bin": {
-    "users": "CLI/users.script.js"
+    "start": "node ./CLI/users.script.js"
   },
   "dependencies": {
     "axios": "^0.16.2",
@@ -15,6 +12,7 @@
     "express": "~4.16.0",
     "helmet": "^3.16.0",
     "http-errors": "~1.6.2",
+    "jade": "^1.11.0",
     "uniqid": "^5.0.3"
   }
 }

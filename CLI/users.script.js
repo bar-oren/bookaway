@@ -37,23 +37,10 @@ const paginationMenu =
     "-- For next page press " + paginationKeys[0] + "\n" +
     "-- For previous page press " + paginationKeys[1] + "\n" +
     "Return to menu: " + paginationKeys[2] + "\n\n";
-const createPaginateString = function (data) {
-    const header = "----- Users (" + data.page + "/" + data.total_pages + ") -----\n";
-    let content = "";
-    let users = data.data;
-    for (let i = 0; i < users.length; i++) {
-        content += userController.createUserModelFromObject(users[i]).toString() + "\n";
-    }
-    return header + content;
-};
 
 const url = "http://localhost:3000/users/";
 
-const printErrorMessage = function (err) {
-    console.log("\n\n ERROR: " + err.message + "\n");
-};
-
-let email, user, firstName, lastName, password, dateOfBirth, page = 0;
+let email, id, firstName, lastName, password, dateOfBirth, page = 0;
 const main = function () {
     app.listen(3000);
     let response;
@@ -67,14 +54,14 @@ const main = function () {
             });
         } else if (input === "2") {
             response = await axios.get(url + ++page + "/" + MAX_USERS_PER_PAGE);
-            console.log(createPaginateString(response.data));
+            console.log(response.data);
             console.log(paginationMenu);
         } else if (input === paginationKeys[0]) {
             if (page >= response.total_pages) {
                 console.log("\nERROR: this is the last page\n");
             } else {
                 response = await axios.get(url + (++page) + "/" + MAX_USERS_PER_PAGE);
-                console.log(createPaginateString(response.data));
+                console.log(response.data);
             }
             console.log(paginationMenu);
         } else if (input === paginationKeys[1]) {
@@ -82,30 +69,37 @@ const main = function () {
                 console.log("\nERROR: this is the first page\n");
             } else {
                 response = await axios.get(url + (--page)+ "/" + MAX_USERS_PER_PAGE);
-                console.log(createPaginateString(response.data));
+                console.log(response.data);
             }
             console.log(paginationMenu);
         } else if (input === paginationKeys[2]) {
+            page = 0;
             console.log(menu);
-        } else if (input === "3") {
+        } else if (input === "3") { // create
+            id = await ask("Enter id: ");
             email = await ask("Enter email: ");
             password = await ask("Enter password: ");
             firstName = await ask("Enter first name: ");
             lastName = await ask("Enter last name");
             dateOfBirth = await ask("Enter date of birth: ");
-            let userModel = new UserModel(email, password, firstName, lastName, dateOfBirth);
+            let userModel = new UserModel(id, email, password, firstName, lastName, dateOfBirth);
             response = await axios.post(url, userModel);
             console.log(response.data);
             console.log(menu);
-        } else if (input === "4") {
-            let id = await ask("Enter id: ");
+        } else if (input === "4") { // update
+            id = await ask("Enter id: ");
             email = await ask("Enter email: ");
             password = await ask("Enter password: ");
             firstName = await ask("Enter first name: ");
             lastName = await ask("Enter last name");
             dateOfBirth = await ask("Enter date of birth: ");
-            let userModel = new UserModel(email, password, firstName, lastName, dateOfBirth);
+            let userModel = new UserModel(id, email, password, firstName, lastName, dateOfBirth);
             response = await axios.put(url + "/" + id, userModel);
+            console.log(response.data);
+            console.log(menu);
+        } else if (input === "5") {
+            id = await ask("Enter id: ");
+            response = await axios.delete(url + id);
             console.log(response.data);
             console.log(menu);
         }

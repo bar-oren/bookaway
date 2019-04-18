@@ -4,7 +4,7 @@ before everything please run: npm i
 
 for running the script open and enter:
 
-$ users
+$ npm start
 
 Additional notes:
 1) Securiry: helmet was included.
